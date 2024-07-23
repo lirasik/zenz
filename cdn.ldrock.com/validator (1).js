@@ -35,71 +35,113 @@
       setInterval(this.bind_forms, 1000);
     }
 
+    // this.on_submit = function(form) {
+
+    //   var nua = navigator.userAgent;
+    //   var is_android_browser = ((nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 &&     nua.indexOf('AppleWebKit') > -1) && !(nua.indexOf('Chrome') > -1));
+
+
+    //   return function(event) {
+    //     event.preventDefault();
+
+    //     var tooltips = document.querySelectorAll('[data-leadrock-tooltip]');
+
+    //     for (var i = 0; i < tooltips.length; i++) {
+    //       tooltips[i].remove();
+    //     }
+
+    //     if (form.getAttribute('data-is-submitting') != undefined) {
+    //       return false;
+    //     }
+
+
+    //     self.metrika.goal('submit_button_clicked');
+		// var name_input = form.querySelector('input[name=name]');
+
+    //     if (name_input && !(vi = self.validate_name(name_input)).valid) {
+    //       self.tooltip(name_input, vi.msg_code);
+    //       self.metrika.goal('name_invalid');
+    //       return false;
+    //     }
+    //     self.metrika.goal('name_valid');
+
+    //     var phone_input = form.querySelector('input[name=phone]');
+
+    //     if (phone_input && !(vi = self.validate_phone(phone_input)).valid) {
+    //       self.tooltip(phone_input, vi.msg_code);
+    //       self.metrika.goal('phone_invalid');
+    //       return false;
+    //     }
+    //     self.metrika.goal('phone_valid');
+
+
+
+    //     var inputs = form.querySelectorAll('input, select, textarea');
+    //     for (var i = 0; i < inputs.length; i++) {
+    //       var input = inputs[i];
+    //       var attr_name = input.getAttribute('name');
+
+    //       if (attr_name == 'name' || attr_name == 'phone') {
+    //         continue;
+    //       }
+
+    //       if (! (vi = self.validate_other(input)).valid) {
+    //         self.tooltip(input, vi.msg_code);
+    //         self.metrika.goal('other_invalid');
+    //         return false;
+    //       }
+    //       self.metrika.goal('other_valid');
+
+    //     }
+
+    //     form.setAttribute('data-is-submitting', '');
+    //     self.show_loading();
+    //     self.metrika.goal('continue_submitting');
+    //     form.submit();
+    //   }
+    // };
     this.on_submit = function(form) {
-
-      var nua = navigator.userAgent;
-      var is_android_browser = ((nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 &&     nua.indexOf('AppleWebKit') > -1) && !(nua.indexOf('Chrome') > -1));
-
-
-      return function(event) {
-        event.preventDefault();
-
-        var tooltips = document.querySelectorAll('[data-leadrock-tooltip]');
-
-        for (var i = 0; i < tooltips.length; i++) {
-          tooltips[i].remove();
-        }
-
-        if (form.getAttribute('data-is-submitting') != undefined) {
-          return false;
-        }
-
-
-        self.metrika.goal('submit_button_clicked');
-		var name_input = form.querySelector('input[name=name]');
-
-        if (name_input && !(vi = self.validate_name(name_input)).valid) {
-          self.tooltip(name_input, vi.msg_code);
+      var tooltips = document.querySelectorAll('[data-leadrock-tooltip]');
+      tooltips.forEach(function(tooltip) {
+        tooltip.remove();
+      });
+    
+      if (form.getAttribute('data-is-submitting') !== null) {
+        return false;
+      }
+    
+      self.metrika.goal('submit_button_clicked');
+    
+      var inputs = form.querySelectorAll('input, select, textarea');
+      for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        var attr_name = input.getAttribute('name');
+    
+        if (attr_name === 'name' && !(vi = self.validate_name(input)).valid) {
+          self.tooltip(input, vi.msg_code);
           self.metrika.goal('name_invalid');
           return false;
         }
-        self.metrika.goal('name_valid');
-
-        var phone_input = form.querySelector('input[name=phone]');
-
-        if (phone_input && !(vi = self.validate_phone(phone_input)).valid) {
-          self.tooltip(phone_input, vi.msg_code);
+        
+        if (attr_name === 'phone' && !(vi = self.validate_phone(input)).valid) {
+          self.tooltip(input, vi.msg_code);
           self.metrika.goal('phone_invalid');
           return false;
         }
-        self.metrika.goal('phone_valid');
-
-
-
-        var inputs = form.querySelectorAll('input, select, textarea');
-        for (var i = 0; i < inputs.length; i++) {
-          var input = inputs[i];
-          var attr_name = input.getAttribute('name');
-
-          if (attr_name == 'name' || attr_name == 'phone') {
-            continue;
-          }
-
-          if (! (vi = self.validate_other(input)).valid) {
-            self.tooltip(input, vi.msg_code);
-            self.metrika.goal('other_invalid');
-            return false;
-          }
-          self.metrika.goal('other_valid');
-
+        
+        if (attr_name !== 'name' && attr_name !== 'phone' && !(vi = self.validate_other(input)).valid) {
+          self.tooltip(input, vi.msg_code);
+          self.metrika.goal('other_invalid');
+          return false;
         }
-
-        form.setAttribute('data-is-submitting', '');
-        self.show_loading();
-        self.metrika.goal('continue_submitting');
-        form.submit();
       }
+    
+      form.setAttribute('data-is-submitting', '');
+      self.show_loading();
+      self.metrika.goal('continue_submitting');
+      form.submit();
     };
+    
 
     this.validate_phone = function (input) {
       var value = input.value;
@@ -146,89 +188,160 @@
       }
     };
 
+    // this.validate_other = function (input) {
+    //   var validation_arr = self.data.validation[input.getAttribute('name')];
+    //   if (validation_arr) {
+    //     for (var i = 0; i < validation_arr.length; i++) {
+    //       var validation = validation_arr[i];
+    //       if (!input.value.match(new RegExp(validation.regex))) {
+    //         return {
+    //           valid: false,
+    //           msg_code: validation.msg_code || 'incorrect_data'
+    //         }
+    //       }
+    //     }
+    //   }
+    //   return {
+    //     valid: true
+    //   }
+    // };
     this.validate_other = function (input) {
       var validation_arr = self.data.validation[input.getAttribute('name')];
       if (validation_arr) {
         for (var i = 0; i < validation_arr.length; i++) {
           var validation = validation_arr[i];
-          if (!input.value.match(new RegExp(validation.regex))) {
+          var regex = new RegExp(validation.regex);
+          if (!regex.test(input.value)) {
             return {
               valid: false,
               msg_code: validation.msg_code || 'incorrect_data'
-            }
+            };
           }
         }
       }
       return {
         valid: true
-      }
+      };
     };
+    
 
+    // this.tooltip = function (input, msg_code) {
+    //   var msg = '';
+    //   var msgs;
+    //   var iso_code;
+
+    //   try {
+    //     iso_code = self.data.geo.iso_code;
+    //   } catch (e) {
+    //     iso_code = null;
+    //   }
+
+    //   if (iso_code) {
+    //     msgs = self.config.geo_tooltip[iso_code];
+    //   }
+
+    //   if (!msgs) {
+    //     msgs = self.config.lang_tooltip[self.browser_language];
+    //   }
+
+    //   if (!msgs) {
+    //     msgs = self.config.geo_tooltip['US'];
+    //   }
+
+    //   if (self.data.tooltips) {
+    //     var keys = Object.keys(self.data.tooltips);
+    //     for (var i = 0; i < keys.length; i++) {
+    //       msgs[keys[i]] = self.data.tooltips[keys[i]];
+    //     }
+    //   }
+
+    //   msg = msgs[msg_code];
+
+    //   var id = 'leadrock-' + Math.random().toString(36).substr(2, 17);
+    //   var html = self.config.tooltip_html.replace(new RegExp('#{id}', 'g'), id);
+    //   html = html.replace(new RegExp('#{text}', 'g'), msg);
+    //   var elem = document.createElement('div');
+    //   d.body.appendChild(elem);
+    //   elem.outerHTML = html;
+    //   elem = document.getElementById(id);
+    //   elem.style.top = input.getBoundingClientRect().top + w.pageYOffset - 10 + 'px';
+    //   elem.style.left = input.getBoundingClientRect().left + w.pageXOffset  + 'px';
+    //   elem.style.maxWidth = input.getBoundingClientRect().width + 'px';
+    //   elem.style.top = parseInt(elem.style.top) - elem.getBoundingClientRect().height + 'px';
+    //   input.style.outline = '2px solid rgba(244, 67, 54, 0.85)';
+    //   input.style.outlineOffset = '1px';
+    //   var focusing_again = false;
+    //   input.addEventListener('focus', function() {
+    //     elem.remove();
+    //     if (!focusing_again) {
+    //       self.metrika.goal('focusing_again');
+    //     }
+    //     focusing_again = true;
+    //     input.style.outline = 'none';
+    //   })
+
+    //   self.metrika.goal('tooltip');
+    // };
     this.tooltip = function (input, msg_code) {
       var msg = '';
-      var msgs;
-      var iso_code;
-
-      try {
-        iso_code = self.data.geo.iso_code;
-      } catch (e) {
-        iso_code = null;
-      }
-
-      if (iso_code) {
-        msgs = self.config.geo_tooltip[iso_code];
-      }
-
-      if (!msgs) {
-        msgs = self.config.lang_tooltip[self.browser_language];
-      }
-
-      if (!msgs) {
-        msgs = self.config.geo_tooltip['US'];
-      }
-
+      var msgs = self.config.lang_tooltip[self.browser_language] || self.config.geo_tooltip['US'];
+      
       if (self.data.tooltips) {
-        var keys = Object.keys(self.data.tooltips);
-        for (var i = 0; i < keys.length; i++) {
-          msgs[keys[i]] = self.data.tooltips[keys[i]];
-        }
+        Object.assign(msgs, self.data.tooltips);
       }
-
-      msg = msgs[msg_code];
-
+    
+      msg = msgs[msg_code] || '';
+    
       var id = 'leadrock-' + Math.random().toString(36).substr(2, 17);
-      var html = self.config.tooltip_html.replace(new RegExp('#{id}', 'g'), id);
-      html = html.replace(new RegExp('#{text}', 'g'), msg);
+      var html = self.config.tooltip_html.replace(new RegExp('#{id}', 'g'), id)
+                                        .replace(new RegExp('#{text}', 'g'), msg);
+    
       var elem = document.createElement('div');
-      d.body.appendChild(elem);
-      elem.outerHTML = html;
+      elem.innerHTML = html;
+      d.body.appendChild(elem.firstChild);
+      
       elem = document.getElementById(id);
-      elem.style.top = input.getBoundingClientRect().top + w.pageYOffset - 10 + 'px';
-      elem.style.left = input.getBoundingClientRect().left + w.pageXOffset  + 'px';
-      elem.style.maxWidth = input.getBoundingClientRect().width + 'px';
-      elem.style.top = parseInt(elem.style.top) - elem.getBoundingClientRect().height + 'px';
+      var rect = input.getBoundingClientRect();
+      elem.style.top = rect.top + w.pageYOffset - elem.offsetHeight - 10 + 'px';
+      elem.style.left = rect.left + w.pageXOffset + 'px';
+      elem.style.maxWidth = rect.width + 'px';
+      
       input.style.outline = '2px solid rgba(244, 67, 54, 0.85)';
       input.style.outlineOffset = '1px';
-      var focusing_again = false;
+      
       input.addEventListener('focus', function() {
         elem.remove();
-        if (!focusing_again) {
-          self.metrika.goal('focusing_again');
-        }
-        focusing_again = true;
         input.style.outline = 'none';
-      })
-
+        self.metrika.goal('focusing_again');
+      });
+    
       self.metrika.goal('tooltip');
     };
+    
 
+    // this.show_loading = function () {
+    //   var id = 'leadrock-' + Math.random().toString(36).substr(2, 17);
+    //   var html = self.config.ww_html.replace(new RegExp(self.config.loader_id_replace, 'g'), id);
+    //   document.body.insertAdjacentHTML( 'beforeend', html );
+    //   self.config.run_ww(id);
+    //   self.metrika.goal('loading');
+    // }
     this.show_loading = function () {
       var id = 'leadrock-' + Math.random().toString(36).substr(2, 17);
       var html = self.config.ww_html.replace(new RegExp(self.config.loader_id_replace, 'g'), id);
-      document.body.insertAdjacentHTML( 'beforeend', html );
+      
+      var fragment = document.createDocumentFragment();
+      var tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      while (tempDiv.firstChild) {
+        fragment.appendChild(tempDiv.firstChild);
+      }
+      
+      document.body.appendChild(fragment);
       self.config.run_ww(id);
       self.metrika.goal('loading');
-    }
+    };
+    
 
     this.bind_forms = function() {
       var forms =  d.querySelectorAll('form');
